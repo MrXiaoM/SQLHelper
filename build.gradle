@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+archivesBaseName = 'SQLHelper'
+group = 'top.mrxiaom'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+publishing {
+    repositories {
+        maven {
+            name = 'localRepo'
+            url = "file://${buildDir}/repo"
+        }
+    }
+    publications {
+        SQLHelper(MavenPublication) {
+            groupId = project.group
+            artifactId = project.archivesBaseName
+            version = project.version
+
+            from components.java
+        }
+    }
+}

@@ -1,5 +1,6 @@
 package top.mrxiaom.sqlhelper;
 
+import top.mrxiaom.sqlhelper.base.SQLangInsertInto;
 import top.mrxiaom.sqlhelper.base.SQLangSelect;
 import top.mrxiaom.sqlhelper.base.SQLangUpdate;
 
@@ -25,6 +26,8 @@ public interface SQLang {
     static SQLangUpdate update(String table) {
         return SQLangUpdate.table(table);
     }
+
+    static SQLangInsertInto insertInto(String table) { return SQLangInsertInto.table(table); }
 
     static void dropTable(Connection conn, String table) {
         try {

@@ -1,6 +1,13 @@
 # SQLHelper
 新人学习数据库时制作的工具库
 
+## 已实现
+
+* `SELECT` 语句
+* `UPDATE` 语句
+* `INSERT` 语句
+* 条件 (`WHERE` 语句)
+
 ## 示例
 
 ```java
@@ -18,6 +25,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
-    implementation 'com.github.MrXiaoM:SQLHelper:1.0'
+    implementation 'com.github.MrXiaoM:SQLHelper:1.1'
 }
 ```

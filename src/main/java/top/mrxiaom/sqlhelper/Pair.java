@@ -24,5 +24,19 @@ public class Pair <K, V>{
         this.value = value;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Pair)) return false;
+        Pair<?, ?> one = (Pair<?, ?>) obj;
+        if (this.getKey() != null){
+            if (!this.getKey().equals(one.getKey())) return false;
+        }
+        else if (one.getKey() != null) return false;
+        if (this.getValue() != null) {
+            return this.getValue().equals(one.getValue());
+        }
+        else return one.getValue() == null;
+    }
+
     public static <K, V> Pair<K, V> of(K key, V value) { return new Pair<>(key, value); }
 }

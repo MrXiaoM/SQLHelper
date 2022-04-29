@@ -10,10 +10,7 @@
 
 ## 示例
 
-```java
-// conn 是数据库连接
-ResultSet resultSet = SQLang.select("websites").column("*").build(conn).get().executeQuery();
-```
+[吾爱破解](https://www.52pojie.cn/thread-1629732-1-1.html)
 
 ## 在你的项目使用
 

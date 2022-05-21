@@ -19,19 +19,24 @@ public class SQLangSelect implements SQLang {
     private final List<String> orderColumns = new ArrayList<>();
     private int limit = 0;
     private EnumOrder order;
+
     private SQLangSelect(String table) {
         this.table = table;
     }
 
     /**
      * 开始准备 SELECT ... FROM 语句
+     *
      * @param table 表名
      * @return 语句
      */
-    public static SQLangSelect from(String table) { return new SQLangSelect(table); }
+    public static SQLangSelect from(String table) {
+        return new SQLangSelect(table);
+    }
 
     /**
      * 预编译语句
+     *
      * @param conn 数据库连接
      * @return 预编译完成的语句
      */
@@ -59,8 +64,8 @@ public class SQLangSelect implements SQLang {
                 int orderSize = orderColumns.size();
                 sql.append(" ORDER BY");
 
-                for (int i = 0; i< orderSize; i++) {
-                    sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? ",":"");
+                for (int i = 0; i < orderSize; i++) {
+                    sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");
                 }
                 sql.append(order.toSQL());
             }
@@ -84,6 +89,7 @@ public class SQLangSelect implements SQLang {
     /**
      * 转为动态语句
      * 不推荐使用
+     *
      * @return 动态语句
      */
     @Override
@@ -110,8 +116,8 @@ public class SQLangSelect implements SQLang {
             int orderSize = orderColumns.size();
             sql.append(" ORDER BY");
 
-            for (int i = 0; i< orderSize; i++) {
-                sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? ",":"");
+            for (int i = 0; i < orderSize; i++) {
+                sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");
             }
             sql.append(order.toSQL());
         }
@@ -121,7 +127,7 @@ public class SQLangSelect implements SQLang {
         sql.append(";");
         String str = sql.toString();
         if (str.contains("?")) {
-            for(Object p : params) {
+            for (Object p : params) {
                 int i = str.indexOf("?");
                 if (i < 0) break;
                 if (p instanceof String) p = "'" + p + "'";
@@ -133,6 +139,7 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 设置返回结果的数量，0为无限制
+     *
      * @param limit 数量
      * @return 语句
      */
@@ -143,11 +150,12 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 设置排列规则
-     * @param order 规则
+     *
+     * @param order   规则
      * @param columns 按照那些列来排
      * @return 语句
      */
-    public SQLangSelect orderBy(EnumOrder order, String... columns){
+    public SQLangSelect orderBy(EnumOrder order, String... columns) {
         if (order != null) this.order = order;
         for (String s : columns) {
             if (!orderColumns.contains(s)) orderColumns.add(s);
@@ -157,6 +165,7 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 设置返回唯一不同的值
+     *
      * @return 语句
      */
     public SQLangSelect distinct() {
@@ -165,6 +174,7 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 设置是否返回唯一不同的值
+     *
      * @param isDistinct 值
      * @return 语句
      */
@@ -175,6 +185,7 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 添加要查询的列，输入*为所有列
+     *
      * @param column 列1,列2,列3...
      * @return
      */
@@ -191,6 +202,7 @@ public class SQLangSelect implements SQLang {
 
     /**
      * 添加查询条件
+     *
      * @param condition 条件，详见包 top.mrxiaom.sqlhelper.conditions
      * @return 语句
      */

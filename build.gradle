@@ -5,15 +5,17 @@ plugins {
 
 archivesBaseName = 'SQLHelper'
 group = 'top.mrxiaom'
-version = '1.1-SNAPSHOT'
+version = '1.2-SNAPSHOT'
 
 repositories {
     mavenLocal()
+    maven { url 'https://maven.aliyun.com/repository/central' }
     mavenCentral()
 }
 
 dependencies {
     testImplementation 'mysql:mysql-connector-java:8.0.29'
+    testImplementation 'org.xerial:sqlite-jdbc:3.36.0.3'
 }
 
 publishing {

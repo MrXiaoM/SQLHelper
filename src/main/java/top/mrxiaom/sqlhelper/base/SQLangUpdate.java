@@ -38,13 +38,17 @@ public class SQLangUpdate implements SQLang {
 
     /**
      * 开始准备 UPDATE 语句
+     *
      * @param table 表名
      * @return 语句
      */
-    public static SQLangUpdate table(String table) { return new SQLangUpdate(table); }
+    public static SQLangUpdate table(String table) {
+        return new SQLangUpdate(table);
+    }
 
     /**
      * 预编译语句
+     *
      * @param conn 数据库连接
      * @return 预编译完成的语句
      */
@@ -88,6 +92,7 @@ public class SQLangUpdate implements SQLang {
 
     /**
      * 允许不安全操作 (允许不填 WHERE)
+     *
      * @return 语句
      */
     public SQLangUpdate allowUnsafe() {
@@ -96,6 +101,7 @@ public class SQLangUpdate implements SQLang {
 
     /**
      * 设置是否允许不安全操作
+     *
      * @param isAllowUnsafe 值
      * @return 语句
      */
@@ -106,6 +112,7 @@ public class SQLangUpdate implements SQLang {
 
     /**
      * 添加要设置表的中对应列的值
+     *
      * @param values Pairs.of(列名称, 值)
      * @return 语句
      */
@@ -119,6 +126,7 @@ public class SQLangUpdate implements SQLang {
 
     /**
      * 添加筛选条件
+     *
      * @param condition 条件，详见包 top.mrxiaom.sqlhelper.conditions
      * @return 语句
      */

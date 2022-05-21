@@ -6,9 +6,10 @@ import top.mrxiaom.sqlhelper.conditions.ICondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLSyntaxErrorException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class SQLangInsertInto implements SQLang {
     private final String table;
@@ -38,13 +39,17 @@ public class SQLangInsertInto implements SQLang {
 
     /**
      * 开始准备 UPDATE 语句
+     *
      * @param table 表名
      * @return 语句
      */
-    public static SQLangInsertInto table(String table) { return new SQLangInsertInto(table); }
+    public static SQLangInsertInto table(String table) {
+        return new SQLangInsertInto(table);
+    }
 
     /**
      * 预编译语句
+     *
      * @param conn 数据库连接
      * @return 预编译完成的语句
      */
@@ -79,6 +84,7 @@ public class SQLangInsertInto implements SQLang {
 
     /**
      * 添加要设置表的中对应列的值
+     *
      * @param values Pairs.of(列名称, 值)
      * @return 语句
      */
@@ -100,11 +106,12 @@ public class SQLangInsertInto implements SQLang {
     /**
      * 添加要设置表的中对应列的值
      * 【注意】执行此操作时若columns有内容将清空所有值
+     *
      * @param values 要添加的值
      * @return 语句
      */
     public final SQLangInsertInto addValues(Object... values) {
-        if(!this.columns.isEmpty()) {
+        if (!this.columns.isEmpty()) {
             this.columns.clear();
             this.values.clear();
         }

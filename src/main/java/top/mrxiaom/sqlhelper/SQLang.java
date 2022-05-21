@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SQLang {
-    default Optional<PreparedStatement> build(SQLHelper helper){
+    default Optional<PreparedStatement> build(SQLHelper helper) {
         return build(helper.getConnection());
     }
 
@@ -27,7 +27,9 @@ public interface SQLang {
         return SQLangUpdate.table(table);
     }
 
-    static SQLangInsertInto insertInto(String table) { return SQLangInsertInto.table(table); }
+    static SQLangInsertInto insertInto(String table) {
+        return SQLangInsertInto.table(table);
+    }
 
     static void dropTable(Connection conn, String table) {
         try {
@@ -50,10 +52,14 @@ public interface SQLang {
     }
 
     static void createTable(Connection conn, String table, TableColumn... columns) {
+        createTable(conn, table, false, columns);
+    }
+
+    static void createTable(Connection conn, String table, boolean ifNotExists, TableColumn... columns) {
         try {
             Statement stat = conn.createStatement();
-            StringBuilder s = new StringBuilder("CREATE TABLE " + table + " (");
-            for(int i = 0; i < columns.length; i++) {
+            StringBuilder s = new StringBuilder("CREATE TABLE " + (ifNotExists ? "IF NOT EXISTS " : "") + table + " (");
+            for (int i = 0; i < columns.length; i++) {
                 TableColumn column = columns[i];
                 s.append(column.getValue()).append(" ").append(column.getKey().toSQLType());
                 if (!column.getAttribute().equals(EnumConstraints.NONE)) s.append(column.getAttribute().toSQL());
@@ -62,7 +68,7 @@ public interface SQLang {
             s.append(");");
             stat.executeUpdate(s.toString());
             stat.close();
-        }catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         }
     }
@@ -71,10 +77,9 @@ public interface SQLang {
         List<String> tables = new ArrayList<>();
         try {
             Statement stat = conn.createStatement();
-            ResultSet result = stat.executeQuery("SHOW TABLES;");
-            while(result.next())
-            {
-                tables.add(result.getString(0));
+            ResultSet result = stat.executeQuery(stat.getClass().getName().contains("sqlite") ? "SELECT Name FROM sqlite_master WHERE type='table'" : "SHOW TABLES;");
+            while (result.next()) {
+                tables.add(result.getString(1));
             }
             stat.close();
         } catch (Throwable t) {
@@ -82,5 +87,4 @@ public interface SQLang {
         }
         return tables;
     }
-
 }

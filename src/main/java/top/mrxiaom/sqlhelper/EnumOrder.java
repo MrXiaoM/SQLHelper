@@ -5,6 +5,7 @@ public enum EnumOrder {
     ASC("ASC"),
     DESC("DESC");
     final String s;
+
     EnumOrder(String s) {
         this.s = s;
     }

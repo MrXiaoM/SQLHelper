@@ -9,6 +9,12 @@ public enum EnumConstraints {
     CHECK("CHECK"),
     DEFAULT("DEFAULT");
     final String s;
-    EnumConstraints(String s) { this.s = s; }
-    public String toSQL() { return " " + s; }
+
+    EnumConstraints(String s) {
+        this.s = s;
+    }
+
+    public String toSQL() {
+        return " " + s;
+    }
 }

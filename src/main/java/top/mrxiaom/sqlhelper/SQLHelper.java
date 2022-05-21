@@ -3,6 +3,7 @@ package top.mrxiaom.sqlhelper;
 import top.mrxiaom.sqlhelper.conditions.Condition;
 import top.mrxiaom.sqlhelper.conditions.EnumOperators;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 public class SQLHelper {
     final Connection conn;
+
     private SQLHelper(Connection conn, boolean init) {
         this.conn = conn;
         if (init) init();
@@ -23,7 +25,9 @@ public class SQLHelper {
         }
     }
 
-    public Connection getConnection() { return conn; }
+    public Connection getConnection() {
+        return conn;
+    }
 
     /**
      * 初次加载时执行
@@ -69,39 +73,71 @@ public class SQLHelper {
             s.get().close();
             if (!target.isEmpty())
                 return Optional.of(target);
-        } catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         }
         return Optional.empty();
     }
 
-    public static Optional<SQLHelper> connectTo(String host, int port, String database, String user, String password) {
-        String DB_URL = "jdbc:mysql://" + host + ":" + port + "/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        try{
+    private static SQLHelper useOrCreateDatabase(Connection conn, String database) throws SQLException {
+        boolean needToCreate = true;
+        Statement stat = conn.createStatement();
+        ResultSet result = stat.executeQuery("SHOW DATABASES");
+        while (result.next()) {
+            if (result.getObject(1).equals(database)) {
+                needToCreate = false;
+                break;
+            }
+        }
+        if (needToCreate) {
+            stat.executeUpdate("CREATE DATABASE IF NOT EXISTS " + database);
+        }
+        stat.executeUpdate("USE " + database);
+        stat.close();
+
+        return new SQLHelper(conn, needToCreate);
+    }
+
+    public static Optional<SQLHelper> connectToSQLite(File file) {
+        return connectToSQLite("org.sqlite.JDBC", file);
+    }
+
+    public static Optional<SQLHelper> connectToSQLite(String jdbc, File file) {
+        String DB_URL = "jdbc:sqlite:" + file.getAbsolutePath();
+        try {
             // 注册 JDBC 驱动
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(jdbc);
             // 打开链接
-            Connection conn = DriverManager.getConnection(DB_URL,user,password);
-            boolean needToCreate = true;
-            Statement stat = conn.createStatement();
-            ResultSet result = stat.executeQuery("SHOW DATABASES");
-            while(result.next())
-            {
-                if (result.getObject(1).equals(database)){
-                    needToCreate = false;
-                    break;
-                }
-            }
-            if (needToCreate) {
-                stat.executeUpdate("CREATE DATABASE IF NOT EXISTS " + database);
-            }
-            stat.executeUpdate("USE " + database);
-            stat.close();
-            return Optional.of(new SQLHelper(conn, needToCreate));
-        } catch(Throwable t){
+            Connection conn = DriverManager.getConnection(DB_URL);
+            return Optional.of(new SQLHelper(conn, false));
+        } catch (Throwable t) {
             // 处理 JDBC 错误
             t.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    public static Optional<SQLHelper> connectToMySQL(String host, int port, String database, String user, String password) {
+        return connectToMySQL("com.mysql.cj.jdbc.Driver", host, port, database, user, password);
+    }
+
+    public static Optional<SQLHelper> connectToMySQL(String jdbc, String host, int port, String database, String user, String password) {
+        String DB_URL = "jdbc:mysql://" + host + ":" + port + "/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        try {
+            // 注册 JDBC 驱动
+            Class.forName(jdbc);
+            // 打开链接
+            Connection conn = DriverManager.getConnection(DB_URL, user, password);
+            return Optional.of(useOrCreateDatabase(conn, database));
+        } catch (Throwable t) {
+            // 处理 JDBC 错误
+            t.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Deprecated
+    public static Optional<SQLHelper> connectTo(String host, int port, String database, String user, String password) {
+        return connectToMySQL(host, port, database, user, password);
     }
 }

@@ -8,6 +8,7 @@
 * `SELECT` 语句
 * `UPDATE` 语句
 * `INSERT` 语句
+* `DELETE` 语句
 * 条件 (`WHERE` 语句)
 
 ## 示例

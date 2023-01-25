@@ -114,6 +114,17 @@ public interface SQLValueType {
             return new ValueNumeric(size, d);
         }
     }
+    SQLValueType LongText = new SQLValueType() {
+        @Override
+        public String getType() {
+            return "LONGTEXT";
+        }
+
+        @Override
+        public String toSQLType() {
+            return "LONGTEXT";
+        }
+    };
 
     String getType();
 

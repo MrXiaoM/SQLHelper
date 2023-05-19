@@ -122,7 +122,10 @@ public class SQLHelper {
     }
 
     public static Optional<SQLHelper> connectToMySQL(String jdbc, String host, int port, String database, String user, String password) {
-        String DB_URL = "jdbc:mysql://" + host + ":" + port + "/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        return connectToMySQL(jdbc, host, port, database, user, password, List.of("useSSL=false", "allowPublicKeyRetrieval=true", "serverTimezone=UTC"));
+    }
+    public static Optional<SQLHelper> connectToMySQL(String jdbc, String host, int port, String database, String user, String password, List<String> params) {
+        String DB_URL = "jdbc:mysql://" + host + ":" + port + "/?" + String.join("&", params);
         try {
             // 注册 JDBC 驱动
             Class.forName(jdbc);

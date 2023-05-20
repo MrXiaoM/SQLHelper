@@ -25,6 +25,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
-    implementation 'com.github.MrXiaoM:SQLHelper:1.4.1'
+    implementation 'com.github.MrXiaoM:SQLHelper:1.4.2'
 }
 ```

@@ -62,7 +62,7 @@ public class SQLangSelect implements SQLang {
             }
             if (!orderColumns.isEmpty()) {
                 int orderSize = orderColumns.size();
-                sql.append(" ORDER BY");
+                sql.append(" ORDER BY ");
 
                 for (int i = 0; i < orderSize; i++) {
                     sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");

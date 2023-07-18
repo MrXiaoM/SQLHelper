@@ -11,6 +11,6 @@ public enum EnumOrder {
     }
 
     public String toSQL() {
-        return (this.equals(DEFAULT) ? "" : " ") + s;
+        return s;
     }
 }

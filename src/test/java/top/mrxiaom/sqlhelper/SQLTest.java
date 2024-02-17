@@ -1,6 +1,7 @@
 package top.mrxiaom.sqlhelper;
 
 import java.io.File;
+import java.sql.PreparedStatement;
 
 public class SQLTest {
     public static void log(Object... obj) {
@@ -28,7 +29,7 @@ public class SQLTest {
                         TableColumn.create(SQLValueType.ValueString.of(32), "materials"),
                         TableColumn.create(SQLValueType.ValueInteger.of(1), "enable"));
             } else log("表players存在");
-            SQLang.insertInto("players")
+            try (PreparedStatement s = SQLang.insertInto("players")
                     .addValues(
                             Pair.of("name", "test"),
                             Pair.of("imageId", "1919810"),
@@ -36,8 +37,10 @@ public class SQLTest {
                             Pair.of("materials", "[]"),
                             Pair.of("enable", 1)
                     )
-                    .build(sql).get().executeUpdate();
-            log("已插入一条记录");
+                    .build(sql)) {
+                s.executeUpdate();
+                log("已插入一条记录");
+            }
         } catch (Throwable t) {
             t.printStackTrace();
         }

@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * 不推荐使用该方法连接到数据库
+ * 请使用 HikariCP 创建连接池
+ */
+@Deprecated
 public class SQLHelper {
     final Connection conn;
 
@@ -58,19 +63,18 @@ public class SQLHelper {
     }
 
     public Optional<List<Object>> get(String table, Pair<String, String> findColumnAndValue, String targetColumn) {
-        try {
-            Optional<PreparedStatement> s = SQLang.select(table).column(findColumnAndValue.getKey(), targetColumn)
-                    .where(
-                            Condition.of(findColumnAndValue.getKey(), EnumOperators.EQUALS, findColumnAndValue.getValue())
-                    ).build(conn);
-            if (!s.isPresent()) return Optional.empty();
-            ResultSet result = s.get().executeQuery();
+        try (PreparedStatement s = SQLang.select(table)
+                .column(findColumnAndValue.getKey(), targetColumn)
+                .where(
+                        Condition.of(findColumnAndValue.getKey(), EnumOperators.EQUALS, findColumnAndValue.getValue())
+                ).build(conn)
+        ) {
+            ResultSet result = s.executeQuery();
             List<Object> target = new ArrayList<>();
             while (result.next()) {
                 target.add(result.getObject(2));
             }
             result.close();
-            s.get().close();
             if (!target.isEmpty())
                 return Optional.of(target);
         } catch (Throwable t) {

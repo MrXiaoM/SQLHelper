@@ -6,17 +6,14 @@ import top.mrxiaom.sqlhelper.conditions.ICondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class SQLangInsertInto implements SQLang {
     private final String table;
     private final List<String> columns = new ArrayList<>();
     private final List<Object> values = new ArrayList<>();
     private final List<ICondition> conditions = new ArrayList<>();
-
+    private final Map<String, Object> dupKeyUpdates = new HashMap<>();
     private SQLangInsertInto(String table) {
         this.table = table;
     }
@@ -35,6 +32,10 @@ public class SQLangInsertInto implements SQLang {
 
     public List<ICondition> getConditions() {
         return conditions;
+    }
+
+    public Map<String, Object> getDuplicateKeyUpdateMap() {
+        return dupKeyUpdates;
     }
 
     /**
@@ -116,6 +117,20 @@ public class SQLangInsertInto implements SQLang {
             this.values.clear();
         }
         this.values.addAll(Arrays.asList(values));
+        return this;
+    }
+
+    /**
+     * 在主键、唯一键等重复时，只更新某些值
+     * @param keysValues 键值列表，第单数个是键，第偶数个是值
+     * @return 语句
+     */
+    public final SQLangInsertInto onDuplicateKeyUpdate(Object... keysValues) {
+        for (int i = 0; i < keysValues.length - 1; i += 2) {
+            String key = keysValues[i].toString();
+            Object value = keysValues[i + 1];
+            dupKeyUpdates.put(key, value);
+        }
         return this;
     }
 }

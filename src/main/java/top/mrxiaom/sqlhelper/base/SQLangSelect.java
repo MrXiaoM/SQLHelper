@@ -1,17 +1,15 @@
 package top.mrxiaom.sqlhelper.base;
 
 import top.mrxiaom.sqlhelper.EnumOrder;
+import top.mrxiaom.sqlhelper.Pair;
 import top.mrxiaom.sqlhelper.SQLang;
 import top.mrxiaom.sqlhelper.conditions.ICondition;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-public class SQLangSelect implements SQLang {
+public class SQLangSelect extends SQLang {
     private final String table;
     private boolean isDistinct = false;
     private final List<String> columns = new ArrayList<>();
@@ -34,56 +32,39 @@ public class SQLangSelect implements SQLang {
         return new SQLangSelect(table);
     }
 
-    /**
-     * 预编译语句
-     *
-     * @param conn 数据库连接
-     * @return 预编译完成的语句
-     */
     @Override
-    public Optional<PreparedStatement> build(Connection conn) {
-        try {
-            if (columns.isEmpty()) columns.add("*");
-            StringBuilder sql = new StringBuilder("SELECT ");
-            if (isDistinct) sql.append("DISTINCT ");
-            int size = columns.size();
-            for (int i = 0; i < size; i++) {
-                sql.append(columns.get(i)).append(i < size - 1 ? "," : " ").append("\n");
-            }
-            sql.append("FROM ").append(table);
-            List<Object> params = new ArrayList<>();
-            if (!conditions.isEmpty()) {
-                sql.append(" WHERE");
-                for (ICondition c : conditions) {
-                    sql.append(" ").append(c.toSQL());
-                    if (!c.getParams().isEmpty())
-                        params.addAll(c.getParams());
-                }
-            }
-            if (!orderColumns.isEmpty()) {
-                int orderSize = orderColumns.size();
-                sql.append(" ORDER BY ");
-
-                for (int i = 0; i < orderSize; i++) {
-                    sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");
-                }
-                sql.append(order.toSQL());
-            }
-            if (limit > 0) {
-                sql.append(" LIMIT ").append(limit);
-            }
-            sql.append(";");
-            PreparedStatement stat = conn.prepareStatement(sql.toString());
-            if (!params.isEmpty()) {
-                for (int i = 0; i < params.size(); i++) {
-                    stat.setObject(i + 1, params.get(i));
-                }
-            }
-            return Optional.of(stat);
-        } catch (Throwable t) {
-            t.printStackTrace();
+    public Pair<String, List<Object>> generateSQL() {
+        if (columns.isEmpty()) columns.add("*");
+        StringBuilder sql = new StringBuilder("SELECT ");
+        if (isDistinct) sql.append("DISTINCT ");
+        int size = columns.size();
+        for (int i = 0; i < size; i++) {
+            sql.append(columns.get(i)).append(i < size - 1 ? "," : " ").append("\n");
         }
-        return Optional.empty();
+        sql.append("FROM ").append(table);
+        List<Object> params = new ArrayList<>();
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE");
+            for (ICondition c : conditions) {
+                sql.append(" ").append(c.toSQL());
+                if (!c.getParams().isEmpty())
+                    params.addAll(c.getParams());
+            }
+        }
+        if (!orderColumns.isEmpty()) {
+            int orderSize = orderColumns.size();
+            sql.append(" ORDER BY ");
+
+            for (int i = 0; i < orderSize; i++) {
+                sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");
+            }
+            sql.append(order.toSQL());
+        }
+        if (limit > 0) {
+            sql.append(" LIMIT ").append(limit);
+        }
+        sql.append(";");
+        return Pair.of(sql.toString(), params);
     }
 
     /**

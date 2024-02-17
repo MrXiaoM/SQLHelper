@@ -1,6 +1,7 @@
 package top.mrxiaom.sqlhelper.base;
 
 import top.mrxiaom.sqlhelper.EnumOrder;
+import top.mrxiaom.sqlhelper.Pair;
 import top.mrxiaom.sqlhelper.SQLang;
 import top.mrxiaom.sqlhelper.conditions.ICondition;
 
@@ -11,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class SQLangDelete implements SQLang {
+public class SQLangDelete extends SQLang {
     private final String table;
     private final List<ICondition> conditions = new ArrayList<>();
 
@@ -29,38 +30,21 @@ public class SQLangDelete implements SQLang {
         return new SQLangDelete(table);
     }
 
-    /**
-     * 预编译语句
-     *
-     * @param conn 数据库连接
-     * @return 预编译完成的语句
-     */
     @Override
-    public Optional<PreparedStatement> build(Connection conn) {
-        try {
-            StringBuilder sql = new StringBuilder("DELETE FROM ");
-            sql.append(table);
-            List<Object> params = new ArrayList<>();
-            if (!conditions.isEmpty()) {
-                sql.append(" WHERE");
-                for (ICondition c : conditions) {
-                    sql.append(" ").append(c.toSQL());
-                    if (!c.getParams().isEmpty())
-                        params.addAll(c.getParams());
-                }
+    public Pair<String, List<Object>> generateSQL() {
+        StringBuilder sql = new StringBuilder("DELETE FROM ");
+        sql.append(table);
+        List<Object> params = new ArrayList<>();
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE");
+            for (ICondition c : conditions) {
+                sql.append(" ").append(c.toSQL());
+                if (!c.getParams().isEmpty())
+                    params.addAll(c.getParams());
             }
-            sql.append(";");
-            PreparedStatement stat = conn.prepareStatement(sql.toString());
-            if (!params.isEmpty()) {
-                for (int i = 0; i < params.size(); i++) {
-                    stat.setObject(i + 1, params.get(i));
-                }
-            }
-            return Optional.of(stat);
-        } catch (Throwable t) {
-            t.printStackTrace();
         }
-        return Optional.empty();
+        sql.append(";");
+        return Pair.of(sql.toString(), params);
     }
 
     /**

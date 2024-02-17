@@ -5,36 +5,65 @@ import top.mrxiaom.sqlhelper.base.SQLangInsertInto;
 import top.mrxiaom.sqlhelper.base.SQLangSelect;
 import top.mrxiaom.sqlhelper.base.SQLangUpdate;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public interface SQLang {
-    default Optional<PreparedStatement> build(SQLHelper helper) {
+public abstract class SQLang {
+
+    /**
+     * 预编译语句
+     *
+     * @param helper 数据库连接
+     * @return 预编译完成的语句
+     */
+    public PreparedStatement build(SQLHelper helper) throws SQLException {
         return build(helper.getConnection());
     }
 
-    Optional<PreparedStatement> build(Connection conn);
+    /**
+     * 预编译语句
+     *
+     * @param conn 数据库连接
+     * @return 预编译完成的语句
+     */
+    public PreparedStatement build(Connection conn) throws SQLException {
+        Pair<String, List<Object>> pair = generateSQL();
+        String sql = pair.getKey();
+        List<Object> params = pair.getValue();
+        return setParams(conn.prepareStatement(sql), params);
+    }
 
-    static SQLangSelect select(String table) {
+    /**
+     * 生成未编译的预编译语句以及参数列表
+     */
+    public abstract Pair<String, List<Object>> generateSQL();
+
+    public static PreparedStatement setParams(PreparedStatement stat, List<Object> params) throws SQLException {
+        if (!params.isEmpty()) {
+            for (int i = 0; i < params.size(); i++) {
+                stat.setObject(i + 1, params.get(i));
+            }
+        }
+        return stat;
+    }
+
+    public static SQLangSelect select(String table) {
         return SQLangSelect.from(table);
     }
 
-    static SQLangUpdate update(String table) {
+    public static SQLangUpdate update(String table) {
         return SQLangUpdate.table(table);
     }
 
-    static SQLangInsertInto insertInto(String table) {
+    public static SQLangInsertInto insertInto(String table) {
         return SQLangInsertInto.table(table);
     }
-    static SQLangDelete delete(String table) {
+    public static SQLangDelete delete(String table) {
         return SQLangDelete.from(table);
     }
-    static void dropTable(Connection conn, String table) {
+    public static void dropTable(Connection conn, String table) {
         try {
             Statement s = conn.createStatement();
             s.executeUpdate("DROP TABLE " + table + ";");
@@ -44,7 +73,7 @@ public interface SQLang {
         }
     }
 
-    static void truncateTable(Connection conn, String table) {
+    public static void truncateTable(Connection conn, String table) {
         try {
             Statement s = conn.createStatement();
             s.executeUpdate("TRUNCATE TABLE " + table + ";");
@@ -54,11 +83,11 @@ public interface SQLang {
         }
     }
 
-    static void createTable(Connection conn, String table, TableColumn... columns) {
+    public static void createTable(Connection conn, String table, TableColumn... columns) {
         createTable(conn, table, false, columns);
     }
 
-    static void createTable(Connection conn, String table, boolean ifNotExists, TableColumn... columns) {
+    public static void createTable(Connection conn, String table, boolean ifNotExists, TableColumn... columns) {
         try {
             Statement stat = conn.createStatement();
             StringBuilder s = new StringBuilder("CREATE TABLE " + (ifNotExists ? "IF NOT EXISTS " : "") + table + " (");
@@ -76,7 +105,7 @@ public interface SQLang {
         }
     }
 
-    static List<String> getTables(Connection conn) {
+    public static List<String> getTables(Connection conn) {
         List<String> tables = new ArrayList<>();
         try {
             Statement stat = conn.createStatement();

@@ -6,9 +6,11 @@ import top.mrxiaom.sqlhelper.conditions.ICondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 
-public class SQLangInsertInto implements SQLang {
+public class SQLangInsertInto extends SQLang {
     private final String table;
     private final List<String> columns = new ArrayList<>();
     private final List<Object> values = new ArrayList<>();
@@ -48,6 +50,33 @@ public class SQLangInsertInto implements SQLang {
         return new SQLangInsertInto(table);
     }
 
+    @Override
+    public Pair<String, List<Object>> generateSQL() {
+        StringBuilder sql = new StringBuilder("INSERT INTO " + table);
+        List<Object> params = new ArrayList<>();
+        StringBuilder valueString = new StringBuilder();
+        int size = values.size();
+        for (int i = 0; i < size; i++) {
+            if (!columns.isEmpty()) {
+                sql.append(i == 0 ? " (" : ",").append(columns.get(i)).append(i == size - 1 ? ")" : "");
+            }
+            params.add(values.get(i));
+            valueString.append(i == 0 ? "(" : ",").append("?").append(i == size - 1 ? ")" : "");
+        }
+        sql.append(" VALUES ").append(valueString);
+        if (!dupKeyUpdates.isEmpty()) {
+            sql.append(" ON DUPLICATE KEY UPDATE ");
+            List<Map.Entry<String, Object>> list = new ArrayList<>(dupKeyUpdates.entrySet());
+            for (int i = 0; i < size; i++) {
+                Map.Entry<String, Object> entry = list.get(i);
+                sql.append(i == 0 ? "" : ",").append(entry.getKey()).append("=?");
+                params.add(entry.getValue());
+            }
+        }
+        sql.append(";");
+        return Pair.of(sql.toString(), params);
+    }
+
     /**
      * 预编译语句
      *
@@ -55,32 +84,9 @@ public class SQLangInsertInto implements SQLang {
      * @return 预编译完成的语句
      */
     @Override
-    public Optional<PreparedStatement> build(Connection conn) {
-        try {
-            if (values.isEmpty()) return Optional.empty();
-            StringBuilder sql = new StringBuilder("INSERT INTO " + table);
-            List<Object> params = new ArrayList<>();
-            StringBuilder valueString = new StringBuilder();
-            int size = values.size();
-            for (int i = 0; i < size; i++) {
-                if (!columns.isEmpty()) {
-                    sql.append(i == 0 ? " (" : ",").append(columns.get(i)).append(i == size - 1 ? ")" : "");
-                }
-                params.add(values.get(i));
-                valueString.append(i == 0 ? "(" : ",").append("?").append(i == size - 1 ? ")" : "");
-            }
-            sql.append(" VALUES ").append(valueString).append(";");
-            PreparedStatement stat = conn.prepareStatement(sql.toString());
-            if (!params.isEmpty()) {
-                for (int i = 0; i < params.size(); i++) {
-                    stat.setObject(i + 1, params.get(i));
-                }
-            }
-            return Optional.of(stat);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return Optional.empty();
+    public PreparedStatement build(Connection conn) throws SQLException {
+        if (values.isEmpty()) throw new SQLSyntaxErrorException("\"values\" can not be empty");;
+        return super.build(conn);
     }
 
     /**

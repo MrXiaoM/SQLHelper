@@ -6,11 +6,12 @@ import top.mrxiaom.sqlhelper.conditions.ICondition;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SQLangUpdate implements SQLang {
+public class SQLangUpdate extends SQLang {
     private final String table;
     private boolean isAllowUnsafe = false;
     private final Map<String, Object> sets = new HashMap<>();
@@ -46,6 +47,29 @@ public class SQLangUpdate implements SQLang {
         return new SQLangUpdate(table);
     }
 
+    @Override
+    public Pair<String, List<Object>> generateSQL() {
+        StringBuilder sql = new StringBuilder("UPDATE " + table + " SET");
+        List<Object> params = new ArrayList<>();
+        int size = sets.size();
+        List<String> keySet = sets.keySet().parallelStream().collect(Collectors.toList());
+        for (int i = 0; i < size; i++) {
+            String key = keySet.get(i);
+            params.add(sets.get(key));
+            sql.append(key).append("=?").append(i < size - 1 ? "," : " ").append("\n");
+        }
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE");
+            for (ICondition c : conditions) {
+                sql.append(" ").append(c.toSQL());
+                if (!c.getParams().isEmpty())
+                    params.addAll(c.getParams());
+            }
+        }
+        sql.append(";");
+        return Pair.of(sql.toString(), params);
+    }
+
     /**
      * 预编译语句
      *
@@ -53,41 +77,13 @@ public class SQLangUpdate implements SQLang {
      * @return 预编译完成的语句
      */
     @Override
-    public Optional<PreparedStatement> build(Connection conn) {
-        try {
-            if (sets.isEmpty()) return Optional.empty();
-            if (!isAllowUnsafe && conditions.isEmpty())
-                throw new SQLSyntaxErrorException("It is not allowed to UPDATE without \"WHERE\" condition! " +
-                        "If you know what you are doing, use `.allowUnsafe()` to continue.");
-            StringBuilder sql = new StringBuilder("UPDATE " + table + " SET");
-            List<Object> params = new ArrayList<>();
-            int size = sets.size();
-            List<String> keySet = sets.keySet().parallelStream().collect(Collectors.toList());
-            for (int i = 0; i < size; i++) {
-                String key = keySet.get(i);
-                params.add(sets.get(key));
-                sql.append(key).append("=?").append(i < size - 1 ? "," : " ").append("\n");
-            }
-            if (!conditions.isEmpty()) {
-                sql.append(" WHERE");
-                for (ICondition c : conditions) {
-                    sql.append(" ").append(c.toSQL());
-                    if (!c.getParams().isEmpty())
-                        params.addAll(c.getParams());
-                }
-            }
-            sql.append(";");
-            PreparedStatement stat = conn.prepareStatement(sql.toString());
-            if (!params.isEmpty()) {
-                for (int i = 0; i < params.size(); i++) {
-                    stat.setObject(i + 1, params.get(i));
-                }
-            }
-            return Optional.of(stat);
-        } catch (Throwable t) {
-            t.printStackTrace();
+    public PreparedStatement build(Connection conn) throws SQLException {
+        if (sets.isEmpty()) throw new SQLSyntaxErrorException("\"sets\" can not be empty");
+        if (!isAllowUnsafe && conditions.isEmpty()) {
+            throw new SQLSyntaxErrorException("It is not allowed to UPDATE without \"WHERE\" condition! " +
+                    "If you know what you are doing, use `.allowUnsafe()` to continue.");
         }
-        return Optional.empty();
+        return super.build(conn);
     }
 
     /**

@@ -56,7 +56,7 @@ public class SQLangSelect extends SQLang {
             sql.append(" ORDER BY ");
 
             for (int i = 0; i < orderSize; i++) {
-                sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : "");
+                sql.append(orderColumns.get(i)).append(i < orderSize - 1 ? "," : " ");
             }
             sql.append(order.toSQL());
         }

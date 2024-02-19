@@ -67,7 +67,7 @@ public class SQLangInsertInto extends SQLang {
         if (!dupKeyUpdates.isEmpty()) {
             sql.append(" ON DUPLICATE KEY UPDATE ");
             List<Map.Entry<String, Object>> list = new ArrayList<>(dupKeyUpdates.entrySet());
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < list.size(); i++) {
                 Map.Entry<String, Object> entry = list.get(i);
                 sql.append(i == 0 ? "" : ",").append(entry.getKey()).append("=?");
                 params.add(entry.getValue());

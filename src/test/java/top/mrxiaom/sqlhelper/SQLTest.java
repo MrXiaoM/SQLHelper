@@ -23,11 +23,11 @@ public class SQLTest {
             if (!SQLang.getTables(sql.getConnection()).contains("players")) {
                 log("表players不存在，正在创建");
                 SQLang.createTable(sql.getConnection(), "players",
-                        TableColumn.create(SQLValueType.ValueString.of(32), "name"),
-                        TableColumn.create(SQLValueType.ValueString.of(32), "imageId"),
-                        TableColumn.create(SQLValueType.ValueString.of(32), "imageContent"),
-                        TableColumn.create(SQLValueType.ValueString.of(32), "materials"),
-                        TableColumn.create(SQLValueType.ValueInteger.of(1), "enable"));
+                        TableColumn.create(SQLValueType.string(32), "name"),
+                        TableColumn.create(SQLValueType.string(32), "imageId"),
+                        TableColumn.create(SQLValueType.string(32), "imageContent"),
+                        TableColumn.create(SQLValueType.string(32), "materials"),
+                        TableColumn.create(SQLValueType.int_(1), "enable"));
             } else log("表players存在");
             try (PreparedStatement s = SQLang.insertInto("players")
                     .addValues(

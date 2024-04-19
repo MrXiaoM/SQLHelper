@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class SQLangDelete extends SQLang {
+public class SQLangDelete implements SQLang {
     private final String table;
     private final List<ICondition> conditions = new ArrayList<>();
 

@@ -3,6 +3,7 @@ package top.mrxiaom.sqlhelper.base;
 import top.mrxiaom.sqlhelper.Pair;
 import top.mrxiaom.sqlhelper.SQLang;
 import top.mrxiaom.sqlhelper.conditions.ICondition;
+import top.mrxiaom.sqlhelper.utils.BuildUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +11,7 @@ import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 
-public class SQLangInsertInto extends SQLang {
+public class SQLangInsertInto implements SQLang {
     private final String table;
     private final List<String> columns = new ArrayList<>();
     private final List<Object> values = new ArrayList<>();
@@ -86,7 +87,7 @@ public class SQLangInsertInto extends SQLang {
     @Override
     public PreparedStatement build(Connection conn) throws SQLException {
         if (values.isEmpty()) throw new SQLSyntaxErrorException("\"values\" can not be empty");;
-        return super.build(conn);
+        return BuildUtils.defaultBuild(conn, this);
     }
 
     /**

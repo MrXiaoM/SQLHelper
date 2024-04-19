@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SQLangSelect extends SQLang {
+public class SQLangSelect implements SQLang {
     private final String table;
     private boolean isDistinct = false;
     private final List<String> columns = new ArrayList<>();

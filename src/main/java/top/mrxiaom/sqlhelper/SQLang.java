@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class SQLang {
+public interface SQLang {
 
     /**
      * 预编译语句
@@ -18,7 +18,7 @@ public abstract class SQLang {
      * @param helper 数据库连接
      * @return 预编译完成的语句
      */
-    public PreparedStatement build(SQLHelper helper) throws SQLException {
+    default PreparedStatement build(SQLHelper helper) throws SQLException {
         return build(helper.getConnection());
     }
 
@@ -28,25 +28,15 @@ public abstract class SQLang {
      * @param conn 数据库连接
      * @return 预编译完成的语句
      */
-    public PreparedStatement build(Connection conn) throws SQLException {
-        Pair<String, List<Object>> pair = generateSQL();
-        String sql = pair.getKey();
-        List<Object> params = pair.getValue();
-        return setParams(conn.prepareStatement(sql), params);
+    default PreparedStatement build(Connection conn) throws SQLException {
+        return BuildUtils.defaultBuild(conn, this);
     }
 
     /**
      * 生成未编译的预编译语句以及参数列表
      */
-    public abstract Pair<String, List<Object>> generateSQL();
+    Pair<String, List<Object>> generateSQL();
 
-    public static PreparedStatement setParams(PreparedStatement stat, List<Object> params) throws SQLException {
-        if (!params.isEmpty()) {
-            for (int i = 0; i < params.size(); i++) {
-                stat.setObject(i + 1, params.get(i));
-            }
-        }
-        return stat;
     }
 
     public static SQLangSelect select(String table) {

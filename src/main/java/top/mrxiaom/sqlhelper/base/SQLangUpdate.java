@@ -3,6 +3,7 @@ package top.mrxiaom.sqlhelper.base;
 import top.mrxiaom.sqlhelper.Pair;
 import top.mrxiaom.sqlhelper.SQLang;
 import top.mrxiaom.sqlhelper.conditions.ICondition;
+import top.mrxiaom.sqlhelper.utils.BuildUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +12,7 @@ import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SQLangUpdate extends SQLang {
+public class SQLangUpdate implements SQLang {
     private final String table;
     private boolean isAllowUnsafe = false;
     private final Map<String, Object> sets = new HashMap<>();
@@ -83,7 +84,7 @@ public class SQLangUpdate extends SQLang {
             throw new SQLSyntaxErrorException("It is not allowed to UPDATE without \"WHERE\" condition! " +
                     "If you know what you are doing, use `.allowUnsafe()` to continue.");
         }
-        return super.build(conn);
+        return BuildUtils.defaultBuild(conn, this);
     }
 
     /**

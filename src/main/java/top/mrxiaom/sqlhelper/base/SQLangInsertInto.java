@@ -140,4 +140,17 @@ public class SQLangInsertInto implements SQLang {
         }
         return this;
     }
+
+    /**
+     * 在主键、唯一键等重复时，只更新某些值
+     * @param keysValues 键值列表
+     * @return 语句
+     */
+    @SafeVarargs
+    public final SQLangInsertInto onDuplicateKey(Pair<String, Object>... keysValues) {
+        for (Pair<String, Object> pair : keysValues) {
+            dupKeyUpdates.put(pair.getKey(), pair.getValue());
+        }
+        return this;
+    }
 }

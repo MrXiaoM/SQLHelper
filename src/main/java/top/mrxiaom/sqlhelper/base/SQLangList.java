@@ -8,7 +8,14 @@ import java.util.*;
 public class SQLangList extends ArrayList<SQLang> implements SQLang {
     @Override
     public Pair<String, List<Object>> generateSQL() {
-        return null;
+        List<String> sqlList = new ArrayList<>();
+        List<Object> objects = new ArrayList<>();
+        for (SQLang sql : this) {
+            Pair<String, List<Object>> pair = sql.generateSQL();
+            sqlList.add(pair.getKey());
+            objects.addAll(pair.getValue());
+        }
+        return Pair.of(String.join("\n", sqlList), objects);
     }
 
     public static SQLangList of(Iterable<SQLang> values) {

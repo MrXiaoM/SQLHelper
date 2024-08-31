@@ -6,7 +6,7 @@ import java.util.List;
 public class Condition<V> implements ICondition {
     @Override
     public String toSQL() {
-        return key + operator.toSQL() + "?";
+        return "`" + key + "`" + operator.toSQL() + "?";
     }
 
     @Override

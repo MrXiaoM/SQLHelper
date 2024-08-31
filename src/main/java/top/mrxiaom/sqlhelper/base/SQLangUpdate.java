@@ -50,14 +50,14 @@ public class SQLangUpdate implements SQLang {
 
     @Override
     public Pair<String, List<Object>> generateSQL() {
-        StringBuilder sql = new StringBuilder("UPDATE " + table + " SET");
+        StringBuilder sql = new StringBuilder("UPDATE " + table + " SET ");
         List<Object> params = new ArrayList<>();
         int size = sets.size();
         List<String> keySet = sets.keySet().parallelStream().collect(Collectors.toList());
         for (int i = 0; i < size; i++) {
             String key = keySet.get(i);
             params.add(sets.get(key));
-            sql.append(key).append("=?").append(i < size - 1 ? "," : " ").append("\n");
+            sql.append("`").append(key).append("`=?").append(i < size - 1 ? "," : " ").append("\n");
         }
         if (!conditions.isEmpty()) {
             sql.append(" WHERE");
